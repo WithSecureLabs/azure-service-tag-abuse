@@ -1,0 +1,32 @@
+...@base.d2
+
+target.nsg: NSG on VM interface{
+  class: nsg
+  note: {
+    label: |md
+      Allow **inbound** traffic  <br/>
+      from **AzureCloud** tag
+    |
+  }
+  couchdb: Product Catalogue { class: couchdb }
+}
+
+scenarios {
+  attack {
+    attacker.vm: Virtual Machine { class: vm }
+    attacker_user <-> attacker.vm {
+      class: attack_path
+    }
+    attacker.vm <-> target.nsg.couchdb {
+      class: attack_path
+    }
+  }
+  standard {
+    attacker_user -- target.nsg: Blocked {
+      class: failed_path
+    }
+  }
+}
+
+
+

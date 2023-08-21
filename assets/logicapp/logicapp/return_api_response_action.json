@@ -1,0 +1,15 @@
+{
+    "inputs": {
+        "body": "@body('call_target_API')",
+        "headers": "@outputs('call_target_API')['headers']",
+        "statusCode": "@outputs('call_target_API')['statusCode']"
+    },
+    "kind": "Http",
+    "runAfter": {
+        "call_target_api": [
+            "Succeeded",
+            "Failed"
+        ]
+    },
+    "type": "Response"
+}

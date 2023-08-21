@@ -1,0 +1,30 @@
+...@base.d2
+
+target.netrule: network policy {
+  note: {
+    label: |md
+      Permits **inbound** traffic <br/>
+      from **Azure Services**
+    |
+  }
+  class: netrule
+  mysql { class: mysql }
+}
+
+scenarios {
+  attack {
+    attacker.vm: Virtual Machine { class: vm }
+    attacker_user <-> attacker.vm {
+      class: attack_path
+    }
+    attacker.vm <-> target.netrule.mysql {
+      class: attack_path
+    }
+  }
+  standard {
+    attacker_user -- target.netrule: Blocked {
+      class: failed_path
+    }
+  }
+}
+

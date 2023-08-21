@@ -1,0 +1,28 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "accountName": {
+            "type": "String",
+            "metadata": {
+                "description": "The name of the Azure DevOps organization to be created."
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "microsoft.visualstudio/account",
+            "apiVersion": "2014-02-26",
+            "name": "[parameters('accountName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "operationType": "Create",
+                "accountName": "[parameters('accountName')]"
+            },
+            "resources": []
+        }
+    ]
+}

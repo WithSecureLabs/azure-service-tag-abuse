@@ -1,0 +1,104 @@
+---
+- name: Check config
+  ansible.builtin.command: "ghe-config-check"
+  register: config_check
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Parse config errors
+  ansible.builtin.set_fact:
+    no_config: "{{ 'unable to read config file' in config_check.stderr }}"
+    no_license: "{{ config_check.stdout_lines | select('search', 'Validation is-valid failed for license.file') | list | length > 0 }}"
+
+- name: Create temporary build directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: ghe
+  register: ghe_dir
+  when: no_config or no_license
+
+- name: Copy license file
+  ansible.builtin.copy:
+    src: "{{ gh_license_file }}"
+    dest: "{{ ghe_dir.path }}/{{ gh_license_file | basename }}"
+    mode: "0400"
+  register: gh_license_remote
+  when: no_config or no_license
+
+- name: Import license
+  ansible.builtin.shell:
+    cmd: "set -o pipefail && cat {{ gh_license_remote.dest }} | ghe-import-license"
+    executable: /usr/bin/bash
+  register: "license_import"
+  until: license_import.rc != 1
+  failed_when: license_import.rc != 0 and license_import != 1
+  retries: 20
+  delay: 6
+  changed_when: "license_import.rc == 0"
+  become: true
+  when: no_config or no_license
+
+- name: Check for admin password
+  ansible.builtin.command: "ghe-config secrets.manage"
+  register: admin_check
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Set admin password
+  ansible.builtin.command:
+    cmd: "ghe-config secrets.manage {{ lookup('ansible.builtin.file', gh_manage_creds) }}"
+  register: "admin_set"
+  changed_when: "admin_set.rc == 0"
+  become: true
+  when: "admin_check.rc == 1 and admin_check.stdout == ''"
+
+
+- name: Import settings
+  ansible.builtin.command:
+    cmd: ghe-import-settings --skip-config-apply
+    stdin: "{{ lookup('ansible.builtin.file', gh_settings_file) | string }}"
+  register: "settings_import"
+  changed_when: "settings_import.rc == 0"
+  become: true
+  when: no_config
+
+- name: Generate initial unsigned cert
+  ansible.builtin.command: /usr/local/share/enterprise/ghe-ssl-certificate-setup -r
+  register: "ssl_self_create"
+  changed_when: "ssl_self_create.rc == 0"
+  become: true
+  when: no_config
+
+
+- name: Check acme ssl
+  ansible.builtin.command: "ghe-ssl-acme -s"
+  register: ssl_acme_check
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Parse acme ssl configuration
+  ansible.builtin.set_fact:
+    gh_acme_current: "{{ ssl_acme_check.stdout_lines | map('replace', ' ', '') | map('split', ':') | community.general.dict }}"
+
+- name: Is ssl configured?
+  ansible.builtin.set_fact:
+    gh_ssl_unconfigured:
+      "{{ '(null)' in gh_acme_current.values() or '' in gh_acme_current.values() }}"
+
+- name: Apply settings
+  ansible.builtin.command:
+    cmd: ghe-config-apply
+  register: "settings_apply"
+  changed_when: "settings_apply.rc == 0"
+  become: true
+  when: gh_ssl_unconfigured
+
+- name: Enable acme ssl and reload
+  ansible.builtin.command: "ghe-ssl-acme -e"
+  register: "ssl_apply"
+  changed_when: "ssl_apply.rc == 0"
+  become: true
+  when: gh_ssl_unconfigured

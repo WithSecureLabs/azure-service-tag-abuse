@@ -1,0 +1,161 @@
+---
+- name: check if service is available
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup"
+    return_content: true
+    validate_certs: false
+  register: gh_init_service_available
+  ignore_errors: true
+
+- name: reboot host (helps with loading disk)
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+  when: gh_init_service_available.status == 503
+  become: true
+
+- name: wait until service is available
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup"
+    return_content: true
+    validate_certs: false
+  register: gh_service_available
+  until: gh_service_available.status != 503
+  retries: 60
+  delay: 10
+
+- name: get csrf token
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup/start"
+    return_content: true
+    validate_certs: false
+  register: gh_start_page
+
+- name: Create temporary build directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: ghe
+  register: ghe_dir
+
+- name: Copy license file
+  ansible.builtin.copy:
+    src: "{{ gh_license_file }}"
+    dest: "{{ ghe_dir.path }}/{{ gh_license_file | basename }}"
+  register: gh_license_remote
+
+- name: create admin user and apply license
+  shell: "curl  -k -X POST {{ gh_url }}:{{ gh_manage_port }}/setup/start \
+    -b {{ gh_start_page.cookies_string }}
+    -F password={{ gh_manage_pass }} \
+    -F password_confirmation={{ gh_manage_pass }} \
+    -F legacy_username=ghe_root_site_admin \
+    -F _csrf={{ (gh_start_page.content | regex_search('name=\"_csrf\" content=\"(.*)\"', '\\1'))[0] }} \
+    -F license=@{{ gh_license_remote.dest }} \
+    "
+  register: gh_license_apply
+
+- name: get unlock csrf
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup/unlock"
+    return_content: true
+    validate_certs: false
+  register: gh_unlock_csrf
+
+- name: unlock
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup/upload/unlock"
+    method: POST
+    headers:
+      cookie: "{{ gh_unlock_csrf.cookies_string }}"
+    body: "_csrf={{ ( gh_unlock_csrf.content | regex_search('name=\"_csrf\" content=\"([^\"]*)', '\\1'))[0] }}&legacy_username=ghe_root_site_admin&password={{ gh_manage_pass }}"
+    body_format: form-urlencoded
+    return_content: true
+    validate_certs: false
+    status_code: 303
+  register:
+    gh_unlock
+
+- name: get secondary csrf token
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup/choose-install-type"
+    headers:
+      cookie: "{{ (gh_unlock.set_cookie | split(';'))[0] }}"
+    return_content: true
+    validate_certs: false
+  register: gh_unlock_csrf
+
+- name: test
+  debug:
+    msg: "{{ gh_unlock_csrf }}"
+
+- name: prep configure settings
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup/choose-install-type"
+    method: POST
+    follow_redirects: false
+    validate_certs: false
+    return_content: true
+    headers:
+      cookie: "{{ (gh_unlock_csrf.set_cookie | split(';'))[0] }}"
+    body: "_csrf={{ ( gh_unlock_csrf.content | regex_search('name=\"_csrf\" content=\"(.*)\"', '\\1'))[0] }}"
+    status_code: 303
+  register: gh_prep_configure
+
+- name: test
+  debug:
+    msg: "{{ gh_prep_configure }}"
+
+- name: set init config
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup/first-run-app-settings"
+    method: POST
+    body_format: form-multipart
+    follow_redirects: false
+    validate_certs: false
+    return_content: true
+    headers:
+      cookie: "{{ (gh_prep_configure.set_cookie | split(';'))[0] }}"
+    body: "{{ gh_config | combine({'_csrf': ( gh_unlock_csrf.content | regex_search('name=\"_csrf\" content=\"(.*)\"', '\\1'))[0]})  }}"
+    status_code: 303
+  register: gh_set_init_config
+
+- name: test
+  debug:
+    msg: "{{gh_set_init_config}}"
+
+- name: reapply config
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup/upload/settings"
+    method: POST
+    body_format: form-multipart
+    follow_redirects: false
+    validate_certs: false
+    return_content: true
+    headers:
+      cookie: "{{ (gh_set_init_config.set_cookie | split(';'))[0] }}"
+    body: "{{ gh_config | combine({'_csrf': ( gh_unlock_csrf.content | regex_search('name=\"_csrf\" content=\"(.*)\"', '\\1'))[0]})  }}"
+    status_code: 303
+  register: gh_reapply_config
+
+- name: check config apply status
+  ansible.builtin.uri:
+    url: "{{ gh_url }}:{{ gh_manage_port }}/setup/configcheck.json"
+    return_content: true
+    validate_certs: false
+    headers:
+      cookie: "{{ (gh_reapply_config.set_cookie | split(';'))[0] }}"
+  register: gh_config_apply_status
+  until: "{{ gh_config_apply_status.json.status != running }}"
+  retries: 120
+  delay: 10
+
+# - name: register with acme
+#   ansible.builtin.command:
+#     cmd: "/usr/local/bin/ghe-ssl-acme -p -i"
+#   become: true
+#   become_user: admin
+#
+# - name: enable let's encrypt feature
+#   ansible.builtin.command:
+#     cmd: "/usr/local/bin/ghe-ssl-acme -e"
+#   become: true
+#   become_user: admin

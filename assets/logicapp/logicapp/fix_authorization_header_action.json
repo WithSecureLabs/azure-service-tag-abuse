@@ -1,0 +1,9 @@
+{
+    "inputs": "@if(contains(triggerOutputs()['headers'],'x-target-authorization'), addProperty(triggerOutputs()['headers'], 'Authorization', triggerOutputs()['headers']['x-target-authorization']), triggerOutputs()['headers'])",
+    "runAfter": {
+        "parse_connection_properties": [
+            "Succeeded"
+        ]
+    },
+    "type": "Compose"
+}

@@ -1,0 +1,254 @@
+{ "enterprise": {
+    "manage_auth": {
+        "login_attempt_limit": "10",
+        "login_attempt_lockout_minutes": "10"
+    },
+    "github_hostname": "${gh_host}",
+    "subdomain_isolation": "false",
+    "ntp": {
+        "primary_server": "0.github.pool.ntp.org",
+        "secondary_server": "1.github.pool.ntp.org"
+    },
+    "auth_mode": "default",
+    "builtin_auth_fallback": "false",
+    "ldap_search_test": "",
+    "ldap": {
+        "host": "",
+        "port": "",
+        "method": "TLS",
+        "bind_dn": "",
+        "password": "",
+        "admin_group": "",
+        "profile": {
+            "ldap.profile.uid": "",
+            "ldap.profile.name": "",
+            "ldap.profile.mail": "",
+            "ldap.profile.key": "",
+            "ldap.profile.gpg_key": ""
+        },
+        "external_auth_token_required": "false",
+        "verify_certificate": "false",
+        "sync_enabled": "false",
+        "user_sync_interval": "1",
+        "team_sync_interval": "1",
+        "user_sync_emails": "false",
+        "user_sync_keys": "false",
+        "user_sync_gpg_keys": "false"
+    },
+    "ldap_base_input": "",
+    "ldap_user_group_input": "",
+    "saml": {
+        "idp_initiated_sso": "false",
+        "disable_admin_demote": "false",
+        "encrypted_assertions": "false",
+        "encryption_method": "aes-128-cbc",
+        "key_transport_method": "rsa-oaep",
+        "sso_url": "",
+        "issuer": "",
+        "signature_method": "rsa-sha256",
+        "digest_method": "sha256",
+        "name_id_format": "persistent",
+        "username_attribute": "",
+        "full_name_attribute": "",
+        "emails_attribute": "",
+        "ssh_keys_attribute": "",
+        "gpg_keys_attribute": ""
+    },
+    "cas": {
+        "url": ""
+    },
+    "github_ssl": {
+        "enabled": "true",
+        "acme": {
+            "enabled": "false",
+            "accept_tos": "true",
+            "contact_email": "",
+            "validation_type": "http-01",
+            "provider": "letsencrypt"
+        },
+        "tls_mode": [
+            "tlsv12",
+            "tlsv13"
+        ],
+        "cert": "",
+        "key": ""
+    },
+    "private_mode": "true",
+    "identicons_host": "dotcom",
+    "configuration-id": 1232132,
+    "configuration-run-count": 1,
+    "signup_enabled": "false",
+    "load_balancer": {
+        "http_forward": "false",
+        "proxy_protocol": "false"
+    },
+    "http_proxy": "",
+    "http_noproxy": "",
+    "mapping": {
+        "enabled": "false",
+        "basemap": "",
+        "token": ""
+    },
+    "pages": {
+        "enabled": "false",
+        "build_timeout_minutes": "11",
+        "sync_timeout_minutes": "10",
+        "header_override": ""
+    },
+    "public_pages": "false",
+    "smtp": {
+        "enabled": "false",
+        "address": "",
+        "port": "0",
+        "domain": "",
+        "authentication": "",
+        "username": "",
+        "password": "",
+        "enforce_tls_auth": "false",
+        "noreply_address": "noreply@${gh_host}",
+        "discard_to_noreply_address": "false"
+    },
+    "snmp": {
+        "enabled": "false",
+        "version": "3",
+        "community": ""
+    },
+    "snmp_username": "",
+    "snmp_sec_level": "authPriv",
+    "snmp_auth_password": "",
+    "snmp_auth_protocol": "SHA",
+    "snmp_priv_password": "",
+    "snmp_priv_protocol": "AES",
+    "syslog": {
+        "enabled": "false",
+        "server": "",
+        "protocol_name": "udp",
+        "tls_enabled": "false"
+    },
+    "collectd": {
+        "enabled": "false",
+        "server": "",
+        "port": "",
+        "encryption": "",
+        "username": "",
+        "password": ""
+    },
+    "api_rate_limiting": {
+        "enabled": "false",
+        "default_rate_limit": "15000",
+        "unauthenticated_rate_limit": "60",
+        "search_default_rate_limit": "30",
+        "search_unauthenticated_rate_limit": "10",
+        "lfs_default_rate_limit": "3000",
+        "lfs_unauthenticated_rate_limit": "100",
+        "graphql_default_rate_limit": "5000",
+        "graphql_unauthenticated_rate_limit": "0"
+    },
+    "abuse_rate_limiting": {
+        "enabled": "false",
+        "requests_per_minute": "900",
+        "cpu_millis_per_minute": "90000",
+        "search_cpu_millis_per_minute": "7500"
+    },
+    "governor": {
+        "quotas_enabled": "false",
+        "limit_network": "",
+        "limit_user": ""
+    },
+    "applications": {
+        "avatars_max_age": "3600"
+    },
+    "feature_toggles": {
+        "actions": {
+            "enabled": "false"
+        },
+        "packages": {
+            "enabled": "false",
+            "container_enabled": "false",
+            "docker_enabled": "true",
+            "maven_enabled": "true",
+            "npm_enabled": "true",
+            "npm_upstreaming_enabled": "false",
+            "rubygems_enabled": "true",
+            "nuget_enabled": "true"
+        },
+        "mobile": {
+            "enabled": "false"
+        },
+        "chatops": {
+            "enabled": "false"
+        }
+    },
+    "actions_storage": {
+        "blob_provider": "azure",
+        "auth_type": "credential",
+        "azure": {
+            "secrets.actions.storage.azure.connection_string": ""
+        },
+        "azure_oidc": {
+            "secrets.actions.storage.azure_oidc.tenant_id": "",
+            "secrets.actions.storage.azure_oidc.client_id": "",
+            "secrets.actions.storage.azure_oidc.storage_account": "",
+            "secrets.actions.storage.azure_oidc.endpoint_suffix": ""
+        },
+        "s3": {
+            "secrets.actions.storage.s3.service_url": "",
+            "secrets.actions.storage.s3.bucket_name": "",
+            "secrets.actions.storage.s3.access_key_id": "",
+            "secrets.actions.storage.s3.access_secret": "",
+            "secrets.actions.storage.s3.force_path_style": "false"
+        },
+        "s3_oidc": {
+            "secrets.actions.storage.s3_oidc.bucket_name": "",
+            "secrets.actions.storage.s3_oidc.role_arn": "",
+            "secrets.actions.storage.s3_oidc.region": ""
+        },
+        "gcs": {
+            "secrets.actions.storage.gcs.service_url": "",
+            "secrets.actions.storage.gcs.bucket_name": "",
+            "secrets.actions.storage.gcs.access_key_id": "",
+            "secrets.actions.storage.gcs.access_secret": "",
+            "secrets.actions.storage.gcs.force_path_style": "false"
+        },
+        "gcs_oidc": {
+            "secrets.actions.storage.gcs_oidc.service_url": "",
+            "secrets.actions.storage.gcs_oidc.bucket_name": "",
+            "secrets.actions.storage.gcs_oidc.workload_id": "",
+            "secrets.actions.storage.gcs_oidc.service_acc": ""
+        }
+    },
+    "checks_retention": {
+        "enabled": "false",
+        "archive_threshold": "400",
+        "delete_threshold": "30"
+    },
+    "packages": {
+        "azure_container_name": "",
+        "azure_connection_string": "",
+        "service_url": "",
+        "s3_bucket": "",
+        "aws_access_key": "",
+        "aws_secret_key": ""
+    },
+    "dependency_graph": {
+        "enabled": "false"
+    },
+    "dependabot": {
+        "enabled": "false"
+    },
+    "code_scanning": {
+        "enabled": "false"
+    },
+    "secret_scanning": {
+        "enabled": "false"
+    },
+    "chatops": {
+        "msteams_app_id": "",
+        "msteams_app_password": "",
+        "msteams_public_endpoint": "",
+        "slack_config_token": "",
+        "slack_public_endpoint": "",
+        "slacksocket_enabled": "false",
+        "slack_app_level_token": ""
+    }
+}}

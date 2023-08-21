@@ -1,0 +1,46 @@
+...@style.d2
+...@orgs.d2
+direction: right
+
+style: {
+  fill: transparent
+  shadow: false
+  border-radius: 0
+}
+
+attacker: {
+  vm: Migration VM {
+    class: vm
+    width: 90
+  }
+}
+
+target: {
+  nsg: NSG on VM interface{
+    class: nsg
+    note: {
+      label: |md
+        Allow **inbound** traffic   <br/> 
+        from **AzureDevOps**  <br/>
+        and **Migration VM**
+      |
+    }
+    devops_server: DevOps Server {
+      class: devops
+      width: 104
+    }
+  }
+  devops: DevOps {
+    class: devops
+    width: 104
+  }
+  vm: Migration VM {
+    class: vm
+    width: 90
+  }
+}
+
+attacker.vm -> target.nsg {class: failed_path}
+target.vm <-> target.nsg.devops_server {class: successful_path}
+
+target.vm -> target.devops {class: successful_path}

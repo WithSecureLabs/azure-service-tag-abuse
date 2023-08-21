@@ -1,0 +1,37 @@
+...@base.d2
+
+target.nsg: NSG on VM interface {
+  class: nsg
+  note {
+    label: |md
+      Allow **inbound** traffic  <br/> 
+      from **LogicApps**
+    |
+  }
+  couchdb: Product Catalogue { class: couchdb }
+}
+
+
+scenarios {
+  attack {
+    attacker.logicapp: Logic App Relay { class: logic_app }
+    attacker_user -> attacker.logicapp {
+      class: attack_path
+    }
+    attacker_user <- attacker.logicapp {
+      class: attack_path
+    }
+    attacker.logicapp -> target.nsg.couchdb {
+      class: attack_path
+    }
+    attacker.logicapp <- target.nsg.couchdb {
+      class: attack_path
+    }
+  }
+  standard {
+    attacker_user -- target.nsg: Blocked {
+      class: failed_path
+    }
+  }
+}
+

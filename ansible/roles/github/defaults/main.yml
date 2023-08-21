@@ -1,0 +1,7 @@
+---
+gh_url: https://statgtadohtcqdevops0vm.uksouth.cloudapp.azure.com
+gh_hostname: statgtadohtcqdevops0vm.uksouth.cloudapp.azure.com
+gh_manage_port: 8443
+gh_manage_pass: Password123
+gh_license_file: ../assets/devops/enterprise.ghl
+gh_manage_creds: ../assets/devops/ghe_manage_creds

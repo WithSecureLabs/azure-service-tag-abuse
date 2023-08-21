@@ -1,0 +1,113 @@
+---
+- name: Add couchdb user
+  ansible.builtin.user:
+    name: couchdb
+  become: true
+
+- name: Install apt-transport-https
+  ansible.builtin.apt:
+    name: apt-transport-https
+    state: present
+    update_cache: true
+  become: true
+
+- name: Install debconf-utils
+  ansible.builtin.apt:
+    name: debconf-utils
+    state: present
+    update_cache: true
+  become: true
+
+- name: Install gnupg
+  ansible.builtin.apt:
+    name: gnupg
+    state: present
+    update_cache: true
+  become: true
+
+- name: Set couchdb admin password
+  ansible.builtin.debconf:
+    name: couchdb
+    question: couchdb/adminpass
+    value: "{{ couchdb_adminpass }}"
+    vtype: password
+  no_log: true
+  become: true
+
+- name: Set couchdb admin password again
+  ansible.builtin.debconf:
+    name: couchdb
+    question: couchdb/adminpass_again
+    value: "{{ couchdb_adminpass }}"
+    vtype: password
+  no_log: true
+  become: true
+
+- name: Set couchdb cookie
+  ansible.builtin.debconf:
+    name: couchdb
+    question: couchdb/cookie
+    value: "{{ couchdb_cookie }}"
+    vtype: string
+  become: true
+
+- name: Set couchdb nodename
+  ansible.builtin.debconf:
+    name: couchdb
+    question: couchdb/nodename
+    value: "{{ couchdb_nodename }}"
+    vtype: string
+  become: true
+
+- name: Set couchdb mode
+  ansible.builtin.debconf:
+    name: couchdb
+    question: couchdb/mode
+    value: "{{ couchdb_mode }}"
+    vtype: string
+  become: true
+
+- name: Set couchdb bind address
+  ansible.builtin.debconf:
+    name: couchdb
+    question: couchdb/bindaddress
+    value: "{{ couchdb_bindaddress }}"
+    vtype: string
+  become: true
+
+- name: Set couchdb post rm remove databases
+  ansible.builtin.debconf:
+    name: couchdb
+    question: couchdb/postrm_remove_database
+    value: "{{ couchdb_postrm_remove_database }}"
+    vtype: boolean
+  become: true
+
+- name: Get couchdb repo key
+  ansible.builtin.get_url:
+    url: https://couchdb.apache.org/repo/keys.asc
+    dest: /usr/share/keyrings/couchdb.asc
+    mode: '0644'
+  become: true
+
+- name: Add couchdb repo
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/couchdb.asc] https://apache.jfrog.io/artifactory/couchdb-deb/ {{ ansible_distribution_release }} main"
+    state: present
+  become: true
+
+- name: Install couchdb
+  ansible.builtin.apt:
+    name: couchdb
+    state: present
+    update_cache: true
+  become: true
+
+- name: Copy couchdb data
+  ansible.builtin.copy:
+    dest: "{{ couchdb_data_dir }}"
+    src: "{{ asset_dir }}/../couchdb_data/"
+    owner: "couchdb"
+    group: "couchdb"
+    mode: '0644'
+  become: true

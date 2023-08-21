@@ -1,0 +1,11 @@
+{
+  "inputs": {
+    "method": "@triggerOutputs()['headers']['x-target-method']",
+    "port": "@if(equals(uriPort(triggerOutputs()['headers']['x-target-uri']), ''), 'no', concat(':', uriPort(triggerOutputs()['headers']['x-target-uri'])))",
+    "uri": "@concat(uriScheme(triggerOutputs()['headers']['x-target-uri']), '://', uriHost(triggerOutputs()['headers']['x-target-uri']), ':', uriPort(triggerOutputs()['headers']['x-target-uri']) ,uriPath(triggerOutputs()['headers']['x-target-uri']))"
+  },
+  "runAfter": {
+    "parse_query_params": ["Succeeded"]
+  },
+  "type": "Compose"
+}

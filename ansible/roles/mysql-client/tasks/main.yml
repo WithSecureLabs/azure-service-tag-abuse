@@ -1,0 +1,7 @@
+---
+- name: Install default-mysql-client
+  ansible.builtin.apt:
+    name: default-mysql-client
+    state: present
+    update_cache: true
+  become: true

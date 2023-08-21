@@ -1,0 +1,13 @@
+{
+  "inputs": {
+    "body": "@triggerBody()?['Body']",
+    "headers": "@outputs('cleanup_headers')",
+    "method": "@{outputs('parse_connection_properties')['method']}",
+    "queries": "@outputs('parse_query_params')",
+    "uri": "@{outputs('parse_connection_properties')['uri']}"
+  },
+  "runAfter": {
+    "cleanup_headers": ["Succeeded"]
+  },
+  "type": "Http"
+}

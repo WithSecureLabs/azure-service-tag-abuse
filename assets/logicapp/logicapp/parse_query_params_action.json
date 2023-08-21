@@ -1,0 +1,5 @@
+{
+  "inputs": "@if(not(equals(uriQuery(triggerOutputs()['headers']['x-target-uri']), '')), json(concat('{', '\"', replace(replace(replace(uriQuery(triggerOutputs()['headers']['x-target-uri']), '?', ''), '=', '\":\"'), '&', '\",\"' ), '\"', '}')), '')",
+  "runAfter": {},
+  "type": "Compose"
+}

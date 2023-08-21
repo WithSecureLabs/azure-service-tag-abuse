@@ -1,0 +1,79 @@
+...@base.d2
+
+target: {
+  nsg: NSG on VM interface{
+    class: nsg
+    note: {
+      label: |md
+        Permits **inbound** traffic <br/>
+        from **AzureDevOps** tag
+      |
+    }
+    github: {
+      class: github 
+      label: GitHub Enterprise
+    }
+  }
+  devops: {
+    class: devops
+    label: Azure DevOps Org
+  }
+  runner: {
+    class: vm
+    label: Pipeline Runner
+  }
+}
+
+scenarios {
+  attack {
+    attacker_user -> attacker.devops {
+      class: attack_path
+    }
+    attacker.devops: Azure DevOps Org { class: devops }
+    target.nsg.github -> target.devops {
+      class: attack_path
+      label: Trigger pipelines
+    }
+    attacker.devops -> target.nsg.github {
+      class: attack_path
+      label: |md
+       Manage code
+       Manage pipelines
+      |
+    }
+    target.devops -> target.runner {
+      class: attack_path
+      label: |md
+         Exfiltrate data
+         Deploy malware
+         Disrupt services
+      |
+    }
+  }
+  standard {
+    attacker_user -- target.nsg: Blocked {
+      class: failed_path
+    }
+    target.nsg.github <- target.devops {
+      class: successful_path
+      label: |md
+       Manage code
+       Manage pipelines
+      |
+    }
+    
+    target.nsg.github -> target.devops {
+      class: successful_path
+      label: Trigger pipelines
+    }
+    
+    target.devops -> target.runner {
+      class: successful_path
+      label: |md
+         Deploy software
+         Deploy infrastructure
+      |
+    }
+  }
+}
+

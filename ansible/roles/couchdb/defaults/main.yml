@@ -1,0 +1,8 @@
+---
+couchdb_adminpass: admin
+couchdb_cookie: zanzibar
+couchdb_mode: standalone
+couchdb_nodename: couchdb@localhost
+couchdb_postrm_remove_database: false
+couchdb_bindaddress: 0.0.0.0
+couchdb_data_dir: /opt/couchdb/data

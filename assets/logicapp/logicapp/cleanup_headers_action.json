@@ -1,0 +1,7 @@
+{
+  "inputs": "@removeProperty(removeProperty(removeProperty(removeProperty(outputs('fix_authorization_header'), 'Host'), 'x-target-method'), 'x-target-uri'), 'x-target-authorization')",
+  "runAfter": {
+    "fix_authorization_header": ["Succeeded"]
+  },
+  "type": "Compose"
+}

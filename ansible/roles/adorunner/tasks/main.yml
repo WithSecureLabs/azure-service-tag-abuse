@@ -1,0 +1,89 @@
+---
+- name: Install git
+  ansible.builtin.apt:
+    name: git
+    state: present
+    update_cache: true
+  become: true
+
+- name: Install acl
+  ansible.builtin.apt:
+    name: acl
+    state: present
+    update_cache: true
+  become: true
+
+- name: Add ado-runner user
+  ansible.builtin.user:
+    name: ado-runner
+  become: true
+
+- name: Ensure directory
+  ansible.builtin.file:
+    path: /opt/ado-runner
+    state: directory
+    mode: "0750"
+    owner: ado-runner
+    group: ado-runner
+  become: true
+
+- name: Ensure working directory
+  ansible.builtin.file:
+    path: "{{ runner_working_dir }}"
+    state: directory
+    mode: "0750"
+    owner: ado-runner
+    group: ado-runner
+  become: true
+
+- name: Download agent
+  ansible.builtin.unarchive:
+    creates: /opt/ado-runner/config.sh
+    src: "{{ agent_uri }}"
+    dest: /opt/ado-runner/
+    remote_src: true
+    owner: ado-runner
+    group: ado-runner
+    mode: "0750"
+  become: true
+
+- name: Make config script executable
+  ansible.builtin.file:
+    path: /opt/ado-runner/config.sh
+    mode: "0770"
+  become: true
+
+- name: Configure agent
+  ansible.builtin.command:
+    argv:
+      - /opt/ado-runner/config.sh
+      - --unattended
+      - --auth pat
+      - --token
+      - "{{ (lookup('ansible.builtin.file', ado_pat_file) | from_json).token }}"
+      - --pool
+      - "{{ runner_pool }}"
+      - --agent
+      - "{{ runner_agent }}"
+      - --acceptTeeEula
+      - --url
+      - "{{ ado_url }}"
+      - --work
+      - "{{ runner_working_dir }}"
+    chdir: "/opt/ado-runner/"
+    creates: "/opt/ado-runner/.agent"
+  become: true
+  become_user: ado-runner
+
+- name: Configure service
+  ansible.builtin.command:
+    cmd: "./svc.sh install ado-runner"
+    chdir: "/opt/ado-runner/"
+    creates: "/opt/ado-runner/.service"
+  become: true
+
+- name: Start service
+  ansible.builtin.command:
+    cmd: "/opt/ado-runner/svc.sh start"
+    chdir: "/opt/ado-runner/"
+  become: true

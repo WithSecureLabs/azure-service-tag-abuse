@@ -1,0 +1,32 @@
+...@style.d2
+
+direction: right
+
+scenarios {
+  attack {
+    attacker {
+      class: organisation
+      label: Attacker organisation
+    }
+    attacker_user {
+      class: attacker_user
+      attacker_user_icon {
+        class: attacker_user_icon
+      }
+    }
+  }
+  standard {
+    attacker_user {
+      class: attacker_user
+      attacker_user_icon {
+        class: attacker_user_icon
+      }
+    }
+  }
+}
+
+target {
+  class: organisation
+  label: Target organisation
+}
+

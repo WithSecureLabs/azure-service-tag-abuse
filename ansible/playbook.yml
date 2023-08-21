@@ -1,0 +1,15 @@
+- hosts: couchdb
+  roles:
+    - couchdb
+
+- hosts: adorunner
+  roles:
+    - adorunner
+
+- hosts: github
+  roles:
+    - github
+
+- hosts: mysqlclient 
+  roles:
+    - mysql-client

@@ -1,0 +1,5 @@
+---
+agent_uri: https://vstsagentpackage.azureedge.net/agent/3.224.1/vsts-agent-linux-x64-3.224.1.tar.gz
+runner_pool: runner-pool
+runner_agent: runner-agent
+runner_working_dir: /usr/local/agent_work
